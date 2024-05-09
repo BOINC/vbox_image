@@ -1,0 +1,67 @@
+#!/bin/bash
+# simple helper script to launch provided boinc_app. 
+
+# declare some variables. 
+# Note project dir is not mounted until after boinc_app is run, unless you mount it manually
+project_dir=/root/project
+slot_dir=/root/shared
+local_log=/root/launcher_local_log.txt
+log_location=/root/shared/launcher_output.txt
+app_location=/root/shared/boinc_app
+debug_file_location=/root/shared/boinc_vm_debug
+
+# to make sure this script doesn't run too long, a counter is started. This counter is the number of seconds the script has been sleeping/waiting for a condition to happen
+counter=0
+
+# clear logs from any pre-existing runs
+rm $local_log
+
+echo "Launcher launched at $(date)" >> $local_log
+
+# automatically mount slot dir, shutdown machine if it takes > 30 seconds
+echo "entering mount while loop" >> $local_log
+mount -t vboxsf shared /root/shared
+while ! mountpoint $slot_dir
+do
+  echo "$slot_dir is not mountpoint" >> $local_log
+  sleep 5
+  counter=$((counter+5))
+  mount -t vboxsf shared $slot_dir
+  echo "attempting mount of $slot_dir" >> $local_log
+  if [ $counter -gt 120 ]; then
+    echo "timeout expired!" >> $local_log
+    shutdown now
+  fi
+done
+
+# Now that shared folder is mounted, copy contents of local log to the shared directory, log to it from now on
+cp $local_log $log_location
+
+if [ ! -f $app_location ]
+then
+  echo "$app_location does not exist" >> $log_location
+  shutdown now
+fi
+if [ ! -x $app_location ]; then
+    chmod +x $app_location
+fi
+if [ ! -x $app_location ]; then
+    echo "$app_location is not executable" >> $log_location
+fi
+
+# run the application
+cd $slot_dir
+$app_location
+
+
+if [ -f $debug_file_location ]
+then
+  echo "not shutting down for 10m due to debug flag" >> $log_location
+  while [ $counter -lt 600 ]
+  do
+    counter=$((counter+30))
+    sleep 30    
+  done
+fi
+
+shutdown now
