@@ -1,0 +1,13 @@
+[Unit]
+Description=boinc app service
+# In theory this should make it wait to run the service until the mount exists. But it doesnt.
+#Requires=virtualbox-guest-utils root-shared.mount
+#RequiresMountsFor=/root/shared
+
+[Service]
+ExecStart=/root/boinc_app_launcher
+# keep restarting until the vbox folder is mounted. This is now handled by the shell script itself
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=multi-user.target
