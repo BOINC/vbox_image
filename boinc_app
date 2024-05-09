@@ -1,0 +1,9 @@
+#!/bin/bash
+# This is a sample bash script for a BOINC app. You can put whatever you want in here, call other executables, etc.
+# Once this script exits, the VM will automatically shut down.
+echo "Current date: $(date)" >> /root/shared/output.txt
+
+# To run an existing executable and save its output, you can do something like this. This will save both stdout and stderr
+# /root/shared/boinc_app_helper  >> /root/shared/stdout.txt 2>&1
+# If you just want stdout:
+# /root/shared/boinc_app_helper  >> /root/shared/stdout.txt
