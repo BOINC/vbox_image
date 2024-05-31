@@ -1,6 +1,8 @@
 # boinc_vbox
 
-This repo contains the recipe to create a Virtualbox image that can be used with BOINC. Tested with Debian 12.5 netinstall. Here's how to make it:
+This repo contains the recipe to create a Virtualbox image that can be used with BOINC. Tested with Debian 12.5 netinstall. The completed image can be found [here](https://boinc.berkeley.edu/dl/vm_image_x64_4.vdi)
+
+Here's how to make it:
 
 1\. Make VM with Virtualbox. Give it like 1GB of RAM, 1 CPU, and say 10GB of disk space. Make a shared folder with folder name "shared" and set it to auto-mount to /root/shared. Set it to boot from the [debian netinstall iso](https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.5.0-amd64-netinst.iso)
 
@@ -41,6 +43,17 @@ This repo contains the recipe to create a Virtualbox image that can be used with
 This vm expects an executable file to be located at `/root/shared/boinc_app`. If this file exists, it will attempt to execute it and shutdown. If you don't want it to automatically shutdown directly after boot, create a file in the slot directory called `boinc_vm_debug`, this will cause it to wait 10 minutes before shutting down. 
 
 There are two logs created by the launcher, one in the slot directory `launcher_output.txt` (if it is able to mount it), and one in /root. 
+
+# How to Modify
+
+To modify the original image and add your own libraries, you can either start at step 1 or you can:
+
+1. Download the vdi file
+2. Create a new VM with at least 2GB of RAM. When prompted, select "use existing hard disk" and point it to the VDI file.
+3. Add a shared folder which mounts to /root/shared. Inside that folder, make a file called boinc_vm_debug, this will prevent the VM from shutting down after running boinc_app or not finding it.
+4. Upon booting the vm, run `ps -a|grep launcher` to find the boinc app launcher, then `kill pid` with pid being the pid shown by the grep command. You will need to do this each time the VM boots.
+5. Make any changes you want to the vm
+6. Follow steps 9+. Note that these steps are not *needed* but they will reduce your vdi file size for easier distribution.
 
 # FAQ
 #### How does this work under the hood?
